@@ -1,5 +1,7 @@
 # Biostats-750-Final-Project
 
+Data visualization --> do this first before diving into performing all methods before!
+
 Logistic regression on the target variable (as the response)
 Possibly doing LDA and QDA
 Using ridge regression or lasso methods
