@@ -15,7 +15,7 @@ Using ridge regression or lasso methods to see if coefficients can be shrunken t
 Bootstrap for estimation of accuracy of a parameter estimate (do we have to come up with what the parameter estimate would be?)
 Cross validation to estimate skill of logistic regression model on unseen data --> can do validation set approach, LOOCV, and k-fold CV and compare the test errors from the three
 
-Can do best subset selection, forward stepwise selection, and backward stepwise selection --> compare best model picked by each method
+Can do best subset selection, forward stepwise selection, and backward stepwise selection --> compare best models picked by each method
 
 General thoughts:
 
