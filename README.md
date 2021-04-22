@@ -8,9 +8,12 @@ Angina - a type of chest pain caused by reduced blood flow to the heart
 
 Methods to use for data analysis:
 
-Logistic regression on the target variable (as the response)
-Possibly doing LDA and QDA
-Using ridge regression or lasso methods
+Logistic regression on the target variable (as the response, is binary)
+Possibly doing LDA and QDA for classification into having heart attack (1) or not (0) classes
+Using ridge regression or lasso methods to see if coefficients can be shrunken towards zero
+
+Bootstrap for estimation of accuracy of a parameter estimate (do we have to come up with what the parameter estimate would be?)
+Cross validation to estimate skill of logistic regression model on unseen data --> can do validation set approach, LOOCV, and k-fold CV and compare the test errors from the three
 
 General thoughts:
 
