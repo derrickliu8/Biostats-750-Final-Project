@@ -1,5 +1,7 @@
 # Biostats-750-Final-Project
 
+STUDY OBJECTIVE: to find which predictor variables should be included in the model to predict whether a person will have a heart attack or not
+
 Data visualization --> do this first before diving into performing all methods before!
 
 Useful definitions to know for the data set we're using:
