@@ -1,0 +1,113 @@
+---
+title: "final project"
+author: "Anna Barry"
+date: "April 22, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+heart <- read.csv("heart.csv")
+library(ggplot2)
+library(tidyverse)
+```
+
+
+histogram of the age
+```{r}
+hist(heart$age)
+```
+
+
+cholestrol by age and sex, seems to be a lot less for sex = 0
+```{r cars}
+ggplot(data = heart, aes(x = age, y = chol)) + geom_point() + stat_smooth(method = lm) +
+                    facet_wrap(.~sex) + labs(main = "chol v age for men and women") 
+```
+
+0 = female, 1 = male, more than twice as many men in this dataset
+```{r}
+heart %>% group_by(sex) %>% summarise( total = n())
+```
+
+
+output by age and sex, not what I would expect, 0 = female, 1 = male
+```{r}
+ggplot(data = heart, aes(x = age, y = output, color = as.factor(sex))) + geom_point() + 
+   geom_smooth(method = "glm", 
+    method.args = list(family = "binomial"), 
+    se = FALSE) + facet_wrap(.~sex)
+```
+
+
+type of angia by output
+```{r}
+heart %>% group_by(cp, output) %>% summarise(total = n())
+```
+
+
+covariance matrix with all predictors
+```{r}
+round(cov(heart), 2)
+
+```
+
+
+correlation amongst all the predictors, non seem to be super correlated
+```{r}
+round(cor(heart), 2)
+```
+
+
+
+angina type v age
+```{r}
+ggplot(data = heart, aes(x = age, y = cp)) + geom_point()
+```
+
+
+
+major number of vessels by age, there should not be 4. it says the range for caa is (0,3)
+```{r}
+ggplot(data = heart, aes(x = age, y = caa)) + geom_point()
+```
+
+fasting blood sugar by output
+```{r}
+heart %>% group_by(fbs, output) %>% summarise( total = n())
+```
+
+
+ecg by age, it looks like maybe as you age you may move up higher
+```{r}
+ggplot(data = heart, aes(x = age, y = restecg)) + geom_point()
+```
+
+
+resting ecg by output, maybe restecg = 1 is significant
+```{r}
+heart %>% group_by(output, restecg) %>% summarise(total = n())
+```
+
+seems like exng = 0 gives us more of a prob for having a heart attack. This makes sense, veins bring blood to heart, arteries take it away. The body will not let it enter the heart as fast.
+```{r}
+ggplot(data = heart, aes(x = age, y = output, color = as.factor(exng))) + 
+      geom_point()   +  geom_smooth(method = "glm", 
+                    method.args = list(family = "binomial"), se = FALSE)
+```
+
+
+maybe people just do not exercise
+```{r}
+heart %>% group_by(exng, restecg) %>% summarise(total = n())
+```
+
+
+
+
+
+
+
+
+
+
