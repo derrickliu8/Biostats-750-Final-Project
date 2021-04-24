@@ -1,0 +1,39 @@
+---
+title: "Variable Selection"
+author: "Derrick Liu"
+date: "4/24/2021"
+output: html_document
+---
+
+```{r}
+heart_dat <- read.csv("heart.csv")
+head(heart_dat)
+```
+
+# Best subset selection
+
+```{r}
+library(leaps)
+
+best_subset_fit <- regsubsets(output ~ ., data = heart_dat, nvmax = 13)
+summary(best_subset_fit)
+```
+
+# Forward stepwise selection
+
+```{r}
+forward_step_fit <- regsubsets(output ~ ., data = heart_dat, nvmax = 13, 
+                               method = "forward")
+
+summary(forward_step_fit)
+```
+
+# Backward stepwise selection
+
+```{r}
+backward_step_fit <- regsubsets(output ~ ., data = heart_dat, nvmax = 13, 
+                               method = "backward")
+
+summary(backward_step_fit)
+```
+
