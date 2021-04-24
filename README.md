@@ -2,6 +2,8 @@
 
 STUDY OBJECTIVE: to find which predictor variables should be included in the model to predict whether a person will have a heart attack or not
 
+Link for helpful info on the dataset: https://www.hindawi.com/journals/cmmm/2017/8272091/tab1/
+
 Data visualization --> do this first before diving into performing all methods before!
 
 Useful definitions to know for the data set we're using:
@@ -28,4 +30,3 @@ Assignments:
 
 Anna - 3 variable selection methods, logistic regression/LDA
 Derrick - 3 variable selection methods, QDA
-
