@@ -24,3 +24,8 @@ General thoughts:
 
 -13 predictor variables --> we suspect that not all of them will be significant in predicting whether a heart attack will occur or not
 
+Assignments:
+
+Anna - 3 variable selection methods, logistic regression/LDA
+Derrick - 3 variable selection methods, QDA
+
