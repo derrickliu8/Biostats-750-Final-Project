@@ -1,0 +1,124 @@
+---
+title: "Biostats 750 Final Project"
+author: "Derrick Liu"
+date: "4/21/2021"
+output: html_document
+---
+
+Study Objective: To determine which of the 13 predictor variables in the data 
+set have a statistically significant impact on whether a person experiences a 
+heart attack. 
+
+```{r}
+# reading in the data set and viewing the first few rows
+
+heart_attack_dat <- read.csv("heart.csv")
+heart_attack_dat_2 <- heart_attack_dat[-86,]
+heart_attack_dat_2
+```
+
+# Data Visualization
+
+```{r}
+# Comparing relationship between Heart Attack Incidence (0/1) and Cholesterol
+# Level
+
+library(ggplot2)
+
+ggplot(data = heart_attack_dat_2, aes(x = chol, y = output)) +
+  geom_point() + 
+  ggtitle("Did Heart Attack Happen vs. Cholesterol Level") + 
+  xlab("Cholesterol Level") + 
+  ylab("Did Heart Attack Happen")
+```
+
+160-189 mg/dl is considered high for cholesterol
+
+cholesterol levels > 200 seem really odd --> is this data accurate? 
+
+```{r}
+# getting summary statistics for each of the numeric type predictor variables to 
+# be used from the data set
+
+library(stargazer)
+
+stargazer(heart_attack_dat_2[c("age","trtbps","chol","thalachh","oldpeak")], type="text",summary.stat=c("n","mean","sd", "min", "max"))
+```
+
+Initial observations from summary table above:
+
+-The blood pressures for people in this data set are also seemingly really high. 
+A healthy systolic blood pressure is between 90 and 120 mm Hg in an adult, 
+according to Healthline. 
+-The cholesterol levels for people in the data set were very, very high. For 
+reference, a healthy level of total cholesterol is 125-200 mg/dL, according to 
+Medline Plus. 
+
+# Applying Methods That We Learned in Class
+
+```{r}
+# fitting a logistic regression model with all 13 predictors
+
+heart_attack_logreg <- glm(output ~ .,
+                           data = heart_attack_dat_2)
+summary(heart_attack_logreg)
+```
+
+```{r}
+# fitting a logistic regression model with the predictors that were found to be 
+# statistically significant in the full model above
+
+heart_attack_logreg2 <- glm(output ~ sex+cp+thalachh+exng+oldpeak+caa+thall,
+                           data = heart_attack_dat_2)
+summary(heart_attack_logreg2)
+```
+
+All of the predictors that were found to be statistically significant in the 
+full model are all still statistically significant when they are included
+in the reduced model.
+
+```{r}
+# running LDA
+
+library(MASS)
+
+lda.fit = lda(output ~ sex+cp+thalachh+exng+oldpeak+caa+thall, 
+              data = heart_attack_dat)
+
+lda.fit
+summary(lda.fit)
+
+# how to interpret LDA output
+```
+
+```{r}
+# running LDA
+
+library(MASS)
+
+qda.fit = qda(output ~ sex+cp+thalachh+exng+oldpeak+caa+thall, 
+              data = heart_attack_dat)
+
+qda.fit
+summary(qda.fit)
+
+# how to interpret QDA output
+```
+
+```{r}
+# running 1000 bootstrap replications with 200 samples
+
+n_rows = nrow(heart_attack_dat)
+n = 200 # number of samples
+N = 1000 # number of bootstrap replications
+
+for(i in 1:N){
+  indices <- sample(1:n_rows, n_rows, replace = TRUE)
+  
+  # need to update a variable that keeps track of number of obs predicted to have heart attack
+}
+
+# can perhaps consider all the bootstrap samples as the training sample and the 
+# original data set as the test sample
+```
+
