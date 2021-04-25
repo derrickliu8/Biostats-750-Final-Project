@@ -136,13 +136,51 @@ Getting same results from best subset selection, forward stepwise selection,
 and backward stepwise selection --> not really sure why --> don't get same 
 results 
 
+# logistic regression
+
+```{r}
+# model with all 11 predictors selected by cross validation
+
+heart_logreg <- glm(output~sex+cp+trtbps+chol+restecg+thalachh+exng+oldpeak+slp+caa+thall,
+                    family = "binomial", data = heart_dat)
+summary(heart_logreg)
+```
+
+```{r}
+# model with just the statistically significant predictors from above
+
+heart_logreg_red <- glm(output~sex+cp+trtbps+thalachh+exng+oldpeak+caa+thall,
+                    family = "binomial", data = heart_dat)
+summary(heart_logreg_red)
+```
+
+All variables that were statistically significant in the model chosen from CV
+are still statistically significant. 
+
+# LDA
+
+```{r}
+# LDA on the best model, which has 11 predictors
+
+library(MASS)
+
+lda.fit = lda(output ~ sex+cp+trtbps+chol+restecg+thalachh+exng+oldpeak+slp+caa+thall, 
+              data = heart_dat)
+
+lda.fit
+```
+
 # QDA
 
 ```{r}
 # QDA on the best model, which has 11 predictors
 
+library(MASS)
 
+qda.fit = qda(output ~ sex+cp+trtbps+chol+restecg+thalachh+exng+oldpeak+slp+caa+thall, 
+              data = heart_dat)
 
+qda.fit
 ```
 
 
