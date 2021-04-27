@@ -193,3 +193,58 @@ qda.fit
 ```
 
 
+
+
+
+Anna work, backwards model
+```{r}
+library(bestglm)
+anna_model <- glm(output~., data = heart_dat, family = binomial)
+
+anna_backwards <- step(anna_model)
+
+summary(anna_backwards)
+
+```
+
+
+forwards model 
+```{r}
+anna_forwards <- step(anna_model, direction = "forward")
+
+summary(anna_forwards)
+```
+
+```{r}
+anna_best <- step(anna_model, direction = "both")
+summary(anna_best)
+```
+My best subset model is the same as my backwards selected model.
+
+
+```{r}
+dt = sort(sample(nrow(heart_dat), nrow(heart_dat)*.9))
+train<-heart_dat[dt,]
+test<-heart_dat[-dt,]
+
+anna.best <- regsubsets(output~., data = train, nvmax = 13 )
+test.matrix <- model.matrix(output~., data = test)
+
+val.errors=rep(NA,13)
+for(i in c(1:13)){
+coefi=coef(anna.best,id=i)
+pred=test.matrix[,names(coefi)]%*%coefi
+val.errors[i]=mean((test$output-pred)^2)
+}
+which.min(val.errors)
+```
+the best number of variables changes everytime.
+
+
+
+
+
+
+
+
+
