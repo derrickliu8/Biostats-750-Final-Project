@@ -136,6 +136,13 @@ Getting same results from best subset selection, forward stepwise selection,
 and backward stepwise selection --> not really sure why --> don't get same 
 results 
 
+```{r}
+# have to pick an appropriate training data set criteria
+
+train = (heart_dat$trtbps > 131)
+```
+
+
 # logistic regression
 
 ```{r}
@@ -165,20 +172,22 @@ are still statistically significant.
 library(MASS)
 
 lda.fit = lda(output ~ sex+cp+trtbps+chol+restecg+thalachh+exng+oldpeak+slp+caa+thall, 
-              data = heart_dat)
+              data = heart_dat, subset = train)
 
 lda.fit
 ```
 
-# QDA
+The coefficients of linear discriminants shows the linear combination of 
+predictor variables that are used to form the LDA decision rule. 
 
+# QDA
 ```{r}
 # QDA on the best model, which has 11 predictors
 
 library(MASS)
 
 qda.fit = qda(output ~ sex+cp+trtbps+chol+restecg+thalachh+exng+oldpeak+slp+caa+thall, 
-              data = heart_dat)
+              data = heart_dat, subset = train)
 
 qda.fit
 ```
