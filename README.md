@@ -10,6 +10,8 @@ Useful definitions to know for the data set we're using:
 
 Angina - a type of chest pain caused by reduced blood flow to the heart
 
+Output (response variable we're considering): 0.5 is chosen as a threshold value in terms of probability. It's not about whether or not someone will get a heart attack but more about how likely a person is to get a heart attack. 
+
 Methods to use for data analysis:
 
 Logistic regression on the target variable (as the response, is binary)
