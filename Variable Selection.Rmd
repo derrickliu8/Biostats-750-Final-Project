@@ -215,7 +215,7 @@ qda.fit
 
 Anna work, backwards model
 ```{r}
-library(bestglm)
+
 anna_model <- glm(output~., data = heart_dat, family = binomial)
 
 anna_backwards <- step(anna_model)
@@ -258,10 +258,57 @@ which.min(val.errors)
 the best number of variables changes everytime.
 
 
+Bestglm, used for logistic regression, regsubset supposedly only does linear models
+```{r}
+#library(bestglm)
+heart_dat2 <- heart_dat
+names(heart_dat2)[14] <- "y"
+
+best <- bestglm(heart_dat2, family = binomial, IC = "CV")
+summary(best$BestModel)
+```
+Using bestglm model to see how we do with prediction
+```{r}
+anna_best_final <- glm(output~ sex + cp + thalachh + oldpeak + caa + thall, data = train, family = binomial)
+anna_probs <- predict(anna_best_final, test, type = "response")
+anna_pred <- rep(0, nrow(test))
+anna_pred[anna_probs > 0.5] <- 1
+
+table(anna_pred, test$output)
+```
+This gives a 71% accuracy
 
 
+good old glm to stop making my head spin
+```{r}
+anna_backwards_final <-glm(formula = output ~ sex + cp + trtbps + restecg + thalachh + 
+    exng + oldpeak + slp + caa + thall, family = binomial, data = train)
+anna_probs <- predict(anna_backwards_final, test, type = "response")
+anna_pred <- rep(0, nrow(test))
+anna_pred[anna_probs > 0.5] <- 1
+
+table(anna_pred, test$output)
+```
+This gives 83.8% accuracy
+
+Using LDA for the best model
+```{r}
+lda_best <- lda(output~ sex + cp + thalachh + oldpeak + caa + thall, data = train)
+lda_best_pred <- predict(lda_best, test)
+
+table(lda_best_pred$class, test$output)
+```
+Does just slightly better than logistic regression
 
 
+Using LDA for backwards model
+```{r}
+lda_backwards <- lda(formula = output ~ sex + cp + trtbps + restecg + thalachh + 
+    exng + oldpeak + slp + caa + thall, data = train)
+lda_backwards_preds <- predict(lda_backwards, test)
 
+table(lda_backwards_preds$class, test$output)
+```
+does slightly worse than log reg
 
 
