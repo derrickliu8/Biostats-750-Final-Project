@@ -16,7 +16,12 @@ head(heart_dat)
 library(leaps)
 
 best_subset_fit <- regsubsets(output ~ ., data = heart_dat, nvmax = 13)
-summary(best_subset_fit)
+best_subset_summ <- summary(best_subset_fit)
+```
+
+```{r}
+which.min(best_subset_summ$bic)
+which.min(best_subset_summ$cp)
 ```
 
 ```{r}
@@ -35,7 +40,7 @@ points(10, summary(best_subset_fit)$adjr2[10], col = "red", cex = 2, pch = 20)
 forward_step_fit <- regsubsets(output ~ ., data = heart_dat, nvmax = 13, 
                                method = "forward")
 
-summary(forward_step_fit)
+forward_step_summ <- summary(forward_step_fit)
 ```
 
 ```{r}
@@ -48,13 +53,19 @@ which.max(summary(forward_step_fit)$adjr2)
 points(10, summary(forward_step_fit)$adjr2[10], col = "red", cex = 2, pch = 20)
 ```
 
+```{r}
+which.min(forward_step_summ$bic)
+which.min(forward_step_summ$cp)
+```
+
+
 # Backward stepwise selection
 
 ```{r}
 backward_step_fit <- regsubsets(output ~ ., data = heart_dat, nvmax = 13, 
                                method = "backward")
 
-summary(backward_step_fit)
+back_step_summ <- summary(backward_step_fit)
 ```
 
 ```{r}
@@ -70,6 +81,12 @@ points(10, summary(backward_step_fit)$adjr2[10], col = "red", cex = 2, pch = 20)
 The adjusted R^2 value is the largest for the models with 10 predictors 
 selected by each best subset selection, forward stepwise selection, and backward
 stepwise selection.
+
+```{r}
+which.min(back_step_summ$bic)
+which.min(back_step_summ$cp)
+```
+
 
 # Selecting the Best Model via Cross Validation
 
