@@ -260,7 +260,7 @@ the best number of variables changes everytime.
 
 Bestglm, used for logistic regression, regsubset supposedly only does linear models
 ```{r}
-#library(bestglm)
+library(bestglm)
 heart_dat2 <- heart_dat
 names(heart_dat2)[14] <- "y"
 
@@ -328,10 +328,24 @@ test.matrix2 <- model.matrix(output~., data = testing_dat)
 val.errors2=rep(NA,13)
 for(i in c(1:13)){
 coefi2=coef(anna.best2,id=i)
-pred2=test.matrix[,names(coefi2)]%*%coefi2
-val.errors2[i]=mean((heart_dat$output[testing]-pred2)^2)
+pred2=test.matrix2[,names(coefi2)]%*%coefi2
+val.errors2[i]=mean((testing_dat$output-pred2)^2)
 }
 which.min(val.errors2)
+
+```
+
+
+Lasso ***Still need to figure out****
+
+```{r}
+#library(glmnet)
+x = heart_dat$output
+y = model.matrix(output ~ ., data = heart_dat)[,-14]
+grid = 10^seq(10,-2,length = 100)
+
+lasso.mod = cv.glmnet(x,y,alpha = 1, lambda = grid, family = "binomial")
+
 
 ```
 
