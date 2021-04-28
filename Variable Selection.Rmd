@@ -311,4 +311,27 @@ table(lda_backwards_preds$class, test$output)
 ```
 does slightly worse than log reg
 
+```{r}
+# Performing validation set approach
+
+#training = sample(x = 1:nrow(heart_dat), size = nrow(heart_dat)/2)
+
+training = sample(c(TRUE, FALSE), nrow(heart_dat), rep = TRUE)
+testing = (!train)
+
+training_dat <- heart_dat[training,]
+testing_dat <- heart_dat[-training,]
+
+anna.best2 <- regsubsets(output~., data = training_dat, nvmax = 13 )
+test.matrix2 <- model.matrix(output~., data = testing_dat)
+
+val.errors2=rep(NA,13)
+for(i in c(1:13)){
+coefi2=coef(anna.best2,id=i)
+pred2=test.matrix[,names(coefi2)]%*%coefi2
+val.errors2[i]=mean((heart_dat$output[testing]-pred2)^2)
+}
+which.min(val.errors2)
+
+```
 
