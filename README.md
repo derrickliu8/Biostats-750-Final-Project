@@ -1,6 +1,6 @@
 # Biostats-750-Final-Project
 
-STUDY OBJECTIVE: to find which predictor variables should be included in the model to predict whether a person will have a heart attack or not
+STUDY OBJECTIVE: to find which predictor variables should be included in the model to predict whether a person is more likely or less likely to have a heart attack
 
 Link for helpful info on the dataset: https://www.hindawi.com/journals/cmmm/2017/8272091/tab1/
 
