@@ -233,6 +233,11 @@ summary(anna_forwards)
 ```
 
 ```{r}
+# hybrid of backward and forward
+# best subset selection may not be best --> have to consider 2^13 different models
+# elastic net and lasso
+# variable selection methods --> see how they work on the models that are chosen, not really trying to pick the "best model"
+
 anna_best <- step(anna_model, direction = "both")
 summary(anna_best)
 ```
