@@ -91,7 +91,7 @@ which.min(back_step_summ$cp)
 # Selecting the Best Model via Cross Validation
 
 ```{r}
-# 10-fold cross validation - code adapted from Lab 4
+# 10-fold cross validation for best subset selection fit - code adapted from Lab 4
 
 predict.regsubsets = function (object ,newdata ,id ,...){ 
   form=as.formula(object$call[[2]]) 
@@ -107,10 +107,10 @@ folds = sample(1:k, nrow(heart_dat), replace = TRUE)
 cv.errors = matrix(NA, k, 13, dimnames = list(NULL, paste(1:13)))
 
 for(j in 1:k){ 
-  best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
   
   for(i in 1:13){
-    pred=predict(best.fit,heart_dat[folds==j,],id=i)
+    pred=predict(best_subset_fit,heart_dat[folds==j,],id=i)
     cv.errors[j,i]=mean((heart_dat$output[folds==j]-pred)^2)
   } 
 }
@@ -119,53 +119,73 @@ mean.cv.errors = apply(cv.errors, 2, mean)
 which.min(mean.cv.errors)
 ```
 
-Cross validation selects an 11-variable model.
+Cross validation selects an 13-variable model for the best subset selection fit.
 
 ```{r}
 plot(mean.cv.errors, type = "b")
 ```
 
 ```{r}
-# Finding the best model with 11 predictors using best subset selection
+# 10-fold cross validation for forward stepwise selection fit - code adapted from Lab 4
 
-reg.best=regsubsets(output~., data = heart_dat, nvmax=13)
-                    
-coef(reg.best,11)
+set.seed(1)
+folds2 = sample(1:k, nrow(heart_dat), replace = TRUE)
+cv.errors2 = matrix(NA, k, 13, dimnames = list(NULL, paste(1:13)))
+
+for(j in 1:k){ 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  
+  for(i in 1:13){
+    pred=predict(forward_step_fit,heart_dat[folds2==j,],id=i)
+    cv.errors2[j,i]=mean((heart_dat$output[folds2==j]-pred)^2)
+  } 
+}
+
+mean.cv.errors2 = apply(cv.errors2, 2, mean)
+which.min(mean.cv.errors2)
+```
+
+Cross validation selects an 13-variable model for the best subset selection fit.
+
+```{r}
+plot(mean.cv.errors2, type = "b")
 ```
 
 ```{r}
-# Finding the best model with 11 predictors using forward stepwise selection
+# 10-fold cross validation for backward stepwise selection fit - code adapted from Lab 4
 
-reg.best_fwd=regsubsets(output~., data = heart_dat, nvmax=13, method = "forward")
-                    
-coef(reg.best_fwd,11)
+set.seed(1)
+folds3 = sample(1:k, nrow(heart_dat), replace = TRUE)
+cv.errors3 = matrix(NA, k, 13, dimnames = list(NULL, paste(1:13)))
+
+for(j in 1:k){ 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  
+  for(i in 1:13){
+    pred=predict(backward_step_fit,heart_dat[folds3==j,],id=i)
+    cv.errors3[j,i]=mean((heart_dat$output[folds3==j]-pred)^2)
+  } 
+}
+
+mean.cv.errors3 = apply(cv.errors3, 2, mean)
+which.min(mean.cv.errors3)
 ```
 
-```{r}
-# Finding the best model with 11 predictors using backward stepwise selection
+Cross validation selects an 13-variable model for the best subset selection fit.
 
-reg.best_backwd=regsubsets(output~., data = heart_dat, nvmax=13, method = "backward")
-                    
-coef(reg.best_backwd,11)
+```{r}
+plot(mean.cv.errors3, type = "b")
 ```
 
 Getting same results from best subset selection, forward stepwise selection, 
-and backward stepwise selection --> not really sure why --> don't get same 
-results 
-
-```{r}
-# have to pick an appropriate training data set criteria
-
-train = (heart_dat$trtbps > 131)
-```
-
+and backward stepwise selection --> not really sure why 
 
 # logistic regression
 
 ```{r}
-# model with all 11 predictors selected by cross validation
+# model with all 13 predictors selected by cross validation
 
-heart_logreg <- glm(output~sex+cp+trtbps+chol+restecg+thalachh+exng+oldpeak+slp+caa+thall,
+heart_logreg <- glm(output~.,
                     family = "binomial", data = heart_dat)
 summary(heart_logreg)
 ```
@@ -173,7 +193,7 @@ summary(heart_logreg)
 ```{r}
 # model with just the statistically significant predictors from above
 
-heart_logreg_red <- glm(output~sex+cp+trtbps+thalachh+exng+oldpeak+caa+thall,
+heart_logreg_red <- glm(output~sex+cp+thalachh+exng+oldpeak+caa+thall,
                     family = "binomial", data = heart_dat)
 summary(heart_logreg_red)
 ```
@@ -184,11 +204,18 @@ are still statistically significant.
 # LDA
 
 ```{r}
-# LDA on the best model, which has 11 predictors
+# has to be chosen purposefully
+
+train = (heart_dat$chol > 200)
+```
+
+
+```{r}
+# LDA on the best model (with the lowest cross-validation error), which was the full model
 
 library(MASS)
 
-lda.fit = lda(output ~ sex+cp+trtbps+chol+restecg+thalachh+exng+oldpeak+slp+caa+thall, 
+lda.fit = lda(output ~ ., 
               data = heart_dat, subset = train)
 
 lda.fit
@@ -233,9 +260,9 @@ summary(anna_forwards)
 ```
 
 ```{r}
-# hybrid of backward and forward
+# hybrid of backward and forward, this is not best subset selection according to Elliot
 # best subset selection may not be best --> have to consider 2^13 different models
-# elastic net and lasso
+# could use elastic net and lasso
 # variable selection methods --> see how they work on the models that are chosen, not really trying to pick the "best model"
 
 anna_best <- step(anna_model, direction = "both")
