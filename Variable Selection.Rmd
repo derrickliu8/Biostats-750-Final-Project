@@ -10,6 +10,26 @@ heart_dat <- read.csv("heart.csv")
 head(heart_dat)
 ```
 
+# Lasso and Ridge
+
+```{r}
+# lasso
+
+library(glmnet)
+
+train=sample(1:nrow(heart_dat), nrow(heart_dat)/2)
+test = (-train)
+
+grid=10^seq(10,-2,length=100)
+
+x=model.matrix(output~.,heart_dat)[,-14]
+y=heart_dat$output
+
+lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid)
+plot(lasso.mod)
+```
+
+
 # Best subset selection
 
 ```{r}
