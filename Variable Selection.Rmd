@@ -13,12 +13,13 @@ head(heart_dat)
 # Lasso and Ridge
 
 ```{r}
-# lasso
+# lasso - code adapted from Lab 5
 
 library(glmnet)
 
 train=sample(1:nrow(heart_dat), nrow(heart_dat)/2)
 test = (-train)
+y.test=y[test]
 
 grid=10^seq(10,-2,length=100)
 
@@ -29,8 +30,95 @@ lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid)
 plot(lasso.mod)
 ```
 
+```{r}
+# continuing lasso - code adapted from Lab 5
+
+set.seed(1)
+cv.out=cv.glmnet(x[train,],y[train],alpha=1)
+plot(cv.out)
+
+bestlam=cv.out$lambda.min # tuning parameter
+lasso.pred=predict(lasso.mod,s=bestlam,newx=x[test,])
+mean((lasso.pred-y.test)^2) # MSE
+```
+
+```{r}
+# ridge - code adapted from Lab 5
+
+ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12)
+ridge.pred=predict(ridge.mod,newx=x[test,])
+mean((ridge.pred-y.test)^2)
+
+```
+
+We observe that the mean square error from lasso (0.156445) is smaller than the
+mean square error from ridge (0.2350136). 
+
+# Fitting a logistic regression model
+
+```{r}
+
+# fitting a model with best subset selection
+
+library(caret)
+library(MASS) # for the stepAIC function
+library(dplyr) # for the pipeline operator
+
+set.seed(1)
+
+best_subset_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+  stepAIC(trace = FALSE)
+
+#train_samples <- heart_dat %>% 
+  #createDataPartition(p = 0.9, list = FALSE)
+#train.data <- heart_dat[train_samples]
+#test.data <- heart_dat[-train_samples]
+#full.model <- glm(output ~ ., data = train.data, family = binomial) %>%
+  #stepAIC(trace = FALSE)
+
+best_subset_logregmodel
+```
+
+By best subset selection, the logistic regression model with the smallest AIC 
+value is 
+log(P(output = 1)) = -1.03335-0.84768*sex+0.83206*cp+0.02041*thalachh-1.84894*exng-0.87327*oldpeak-0.79154*caa
+
+```{r}
+# fitting a model with forward stepwise selection
+
+forward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+  stepAIC(direction = "forward", trace = FALSE)
+
+forward_logregmodel
+```
+
+By forward stepwise selection, the logistic regression model with the smallest
+AIC value is 
+
+log(P(output = 1)) = 0.928318-0.014667*age-0.866589*sex+0.836280*cp+0.005887 *trtbps-0.003903*chol-0.587233*fbs+0.418808*restecg+0.016479*thalachh-1.757281*exng-0.830573*oldpeak+0.307920*slp -0.660102*caa-0.445072*thall
+
+```{r}
+# fitting a model with backward stepwise selection
+
+backward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+  stepAIC(direction = "backward", trace = FALSE)
+
+backward_logregmodel
+```
+
+I get the same model from backward stepwise selection as I get from best subset
+selection.
+
+The model chosen by best subset selection/backward stepwise selection has an AIC
+value (116.4) that is smaller than the AIC of the model chosen by forward 
+stepwise selection (126.8). 
 
 # Best subset selection
+
+```{r}
+
+```
+
 
 ```{r}
 library(leaps)
