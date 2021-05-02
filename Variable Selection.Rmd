@@ -192,22 +192,56 @@ mean.cv.errors
 #cv.error.10
 ```
 
-I am trying this out
+Anna-I am trying this out
 ```{r}
+model_saver <- matrix(ncol = 10)
+cv.errors2 = matrix(NA, k, 13)
+intercept <- matrix(NA, k, 11)
+
 for(j in 1:k){ 
   #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+   best_subset_logregmodel <- glm(output ~., data = heart_dat[folds != j,], family = binomial) %>%
+  stepAIC(trace = F)
+  model_saver[j] <- length(best_subset_logregmodel$coefficients)  #saves the number of non-zero coefficients
+  intercept[j,] <- best_subset_logregmodel$coefficients[1:11]     #looks at model coefficients
   
-  for(i in 1:13){
-    pred=predict(best_subset_logregmodel,heart_dat[folds==j,], id = i, type = "response") #what does id do?
+    for(i in 1:13){
+    pred=predict(best_subset_logregmodel,heart_dat[folds==j,], type = "response") #what does id do? id does nothing
     pred = ifelse(pred > 0.5, 1, 0)
-    cv.errors[j,i]=mean((heart_dat$output[folds==j]-pred)^2)
-  } 
+    cv.errors2[j, i]=mean((heart_dat$output[folds==j] != pred))
+    }
 }
 
-mean.cv.errors.anna = apply(cv.errors, 1, mean)
-mean.cv.errors.anna
-
+mean.cv.errors.anna = mean(cv.errors2)
+#cv.errors2
+intercept
 ```
+Anna - this is telling me that the models with 10,11 - 14 predictors give basically the same test errors with logsitcs reg. My brain hurts
+```{r}
+cv.errors3 = matrix(NA, k, 13)
+intercept <- matrix(NA, k, 14)
+
+for(j in 1:k){ 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  forward_logregmodel <- glm(output ~., data = heart_dat[folds != j,], family = binomial) %>%
+  stepAIC(direction = "forward", trace = FALSE)
+  model_saver[j] <- length(forward_logregmodel$coefficients)   #saves the number of non zero coefficients
+  intercept[j,] <- forward_logregmodel$coefficients[1:14] #looks at model coeffeicent
+  
+    for(i in 1:13){  
+    pred=predict(forward_logregmodel,heart_dat[folds==j,], type = "response") #what does id do? id does nothing
+    pred = ifelse(pred > 0.5, 1, 0)
+    cv.errors3[j,i]=mean(heart_dat$output[folds==j] != pred)
+    } 
+}
+
+mean.cv.errors.anna = mean(cv.errors3)
+#cv.errors3
+intercept
+```
+
+
+
 
 ```{r}
 # finding best model from variable selection methods using 5-fold CV
