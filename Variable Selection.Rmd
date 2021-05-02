@@ -19,6 +19,7 @@ library(glmnet)
 
 train=sample(1:nrow(heart_dat), nrow(heart_dat)/2)
 test = (-train)
+y=heart_dat$output
 y.test=y[test]
 
 grid=10^seq(10,-2,length=100)
@@ -51,8 +52,8 @@ mean((ridge.pred-y.test)^2)
 
 ```
 
-We observe that the mean square error from lasso (0.156445) is smaller than the
-mean square error from ridge (0.2350136). 
+We observe that the mean square error from lasso (0.135445) is smaller than the
+mean square error from ridge (0.2235973). 
 
 # Fitting a logistic regression model
 
@@ -81,7 +82,9 @@ best_subset_logregmodel
 
 By best subset selection, the logistic regression model with the smallest AIC 
 value is 
-log(P(output = 1)) = -1.03335-0.84768*sex+0.83206*cp+0.02041*thalachh-1.84894*exng-0.87327*oldpeak-0.79154*caa
+log(P(output = 1)) = 4.06126-0.04456*age-1.01364*sex+0.84954*cp+0.79620*restecg -1.60837*exng-0.52590*oldpeak+0.92052*slp-0.69045*caa-0.73848*thall
+
+^has 9 total predictors
 
 ```{r}
 # fitting a model with forward stepwise selection
@@ -95,7 +98,9 @@ forward_logregmodel
 By forward stepwise selection, the logistic regression model with the smallest
 AIC value is 
 
-log(P(output = 1)) = 0.928318-0.014667*age-0.866589*sex+0.836280*cp+0.005887 *trtbps-0.003903*chol-0.587233*fbs+0.418808*restecg+0.016479*thalachh-1.757281*exng-0.830573*oldpeak+0.307920*slp -0.660102*caa-0.445072*thall
+log(P(output = 1)) = 2.5504570-0.0277105*age-1.0056065*sex+0.8132523*cp-0.0115987*trtbps -0.0007255*chol+0.0291891*fbs+0.8567083*restecg+0.0162629*thalachh-1.3413673*exng-0.4693130*oldpeak+0.7931857*slp -0.7187493*caa-0.7710355*thall
+
+^has all 13 total predictors
 
 ```{r}
 # fitting a model with backward stepwise selection
@@ -110,8 +115,87 @@ I get the same model from backward stepwise selection as I get from best subset
 selection.
 
 The model chosen by best subset selection/backward stepwise selection has an AIC
-value (116.4) that is smaller than the AIC of the model chosen by forward 
-stepwise selection (126.8). 
+value (127.6) that is smaller than the AIC of the model chosen by forward 
+stepwise selection (133.9). 
+
+```{r}
+# Performing validation set approach
+
+#training = sample(x = 1:nrow(heart_dat), size = nrow(heart_dat)/2)
+
+training = sample(c(TRUE, FALSE), nrow(heart_dat), rep = TRUE)
+testing = (!train)
+
+training_dat <- heart_dat[training,]
+testing_dat <- heart_dat[-training,]
+
+anna.best2 <- regsubsets(output~., data = training_dat, nvmax = 13 )
+test.matrix2 <- model.matrix(output~., data = testing_dat)
+
+val.errors2=rep(NA,13)
+for(i in c(1:13)){
+coefi2=coef(anna.best2,id=i)
+pred2=test.matrix2[,names(coefi2)]%*%coefi2
+val.errors2[i]=mean((testing_dat$output-pred2)^2)
+}
+which.min(val.errors2)
+
+```
+
+```{r}
+# finding best model from variable selection methods using 10-fold CV
+
+k = 10
+set.seed(1)
+folds = sample(1:k, nrow(heart_dat), replace = TRUE)
+cv.errors = matrix(NA, k, 13, dimnames = list(NULL, paste(1:13)))
+
+for(j in 1:k){ 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  
+  for(i in 1:13){
+    pred=predict(best_subset_logregmodel,heart_dat[folds==j,],id=i)
+    cv.errors[j,i]=mean((heart_dat$output[folds==j]-pred)^2)
+  } 
+}
+
+mean.cv.errors = apply(cv.errors, 2, mean)
+mean.cv.errors
+
+# alternate method --> producing NAs
+
+library(boot)
+
+cv.error.10=rep(0,10) 
+for (i in 1:10){ 
+  cv.error.10[i]=cv.glm(heart_dat,best_subset_logregmodel,K=10)$delta[1] 
+} 
+cv.error.10
+
+```
+
+```{r}
+# finding best model from variable selection methods using 5-fold CV
+
+k2 = 5
+set.seed(1)
+folds = sample(1:k2, nrow(heart_dat), replace = TRUE)
+cv.errors2 = matrix(NA, k2, 13, dimnames = list(NULL, paste(1:13)))
+
+for(j in 1:k2){ 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  
+  for(i in 1:13){
+    pred=predict(best_subset_logregmodel,heart_dat[folds==j,],id=i)
+    cv.errors2[j,i]=mean((heart_dat$output[folds==j]-pred)^2)
+  } 
+}
+
+#mean.cv.errors2 = apply(cv.errors2, 2, mean)
+#which.min(mean.cv.errors2)
+cv.errors2
+```
+
 
 # Best subset selection
 
@@ -209,22 +293,6 @@ predict.regsubsets = function (object ,newdata ,id ,...){
   mat[,xvars]%*%coefi 
 }
 
-k = 10
-set.seed(1)
-folds = sample(1:k, nrow(heart_dat), replace = TRUE)
-cv.errors = matrix(NA, k, 13, dimnames = list(NULL, paste(1:13)))
-
-for(j in 1:k){ 
-  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
-  
-  for(i in 1:13){
-    pred=predict(best_subset_fit,heart_dat[folds==j,],id=i)
-    cv.errors[j,i]=mean((heart_dat$output[folds==j]-pred)^2)
-  } 
-}
-
-mean.cv.errors = apply(cv.errors, 2, mean)
-which.min(mean.cv.errors)
 ```
 
 Cross validation selects an 13-variable model for the best subset selection fit.
@@ -450,31 +518,6 @@ lda_backwards_preds <- predict(lda_backwards, test)
 table(lda_backwards_preds$class, test$output)
 ```
 does slightly worse than log reg
-
-```{r}
-# Performing validation set approach
-
-#training = sample(x = 1:nrow(heart_dat), size = nrow(heart_dat)/2)
-
-training = sample(c(TRUE, FALSE), nrow(heart_dat), rep = TRUE)
-testing = (!train)
-
-training_dat <- heart_dat[training,]
-testing_dat <- heart_dat[-training,]
-
-anna.best2 <- regsubsets(output~., data = training_dat, nvmax = 13 )
-test.matrix2 <- model.matrix(output~., data = testing_dat)
-
-val.errors2=rep(NA,13)
-for(i in c(1:13)){
-coefi2=coef(anna.best2,id=i)
-pred2=test.matrix2[,names(coefi2)]%*%coefi2
-val.errors2[i]=mean((testing_dat$output-pred2)^2)
-}
-which.min(val.errors2)
-
-```
-
 
 Lasso ***Still need to figure out****
 
