@@ -31,6 +31,9 @@ lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid)
 plot(lasso.mod)
 ```
 
+
+
+
 ```{r}
 # continuing lasso - code adapted from Lab 5
 
@@ -42,6 +45,13 @@ bestlam=cv.out$lambda.min # tuning parameter
 lasso.pred=predict(lasso.mod,s=bestlam,newx=x[test,])
 mean((lasso.pred-y.test)^2) # MSE
 ```
+
+This is saying that the model with the smallest lambda gives all the coefficients to be zero.
+```{r}
+min <- which.min(cv.out$lambda)
+coef(lasso.mod)[,min]
+```
+
 
 ```{r}
 # ridge - code adapted from Lab 5
@@ -55,13 +65,20 @@ mean((ridge.pred-y.test)^2)
 We observe that the mean square error from lasso (0.135445) is smaller than the
 mean square error from ridge (0.2235973). 
 
+```{r}
+coef(ridge.mod)[,1]
+```
+These are all also essentially zero. This is really bizzare
+
+
+
 # Fitting a logistic regression model
 
 ```{r}
 
 # fitting a model with best subset selection
 
-library(caret)
+#library(caret)
 library(MASS) # for the stepAIC function
 library(dplyr) # for the pipeline operator
 
@@ -84,7 +101,7 @@ By best subset selection, the logistic regression model with the smallest AIC
 value is 
 log(P(output = 1)) = 4.06126-0.04456*age-1.01364*sex+0.84954*cp+0.79620*restecg -1.60837*exng-0.52590*oldpeak+0.92052*slp-0.69045*caa-0.73848*thall
 
-^has 9 total predictors
+^has 9 total predictors (I am only counting 6 predictors)
 
 ```{r}
 # fitting a model with forward stepwise selection
@@ -144,6 +161,8 @@ which.min(val.errors2)
 
 ```{r}
 # finding best model from variable selection methods using 10-fold CV
+# I am confused with the folds part of this code
+
 
 k = 10
 set.seed(1)
@@ -154,7 +173,7 @@ for(j in 1:k){
   #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
   
   for(i in 1:13){
-    pred=predict(best_subset_logregmodel,heart_dat[folds==j,],id=i)
+    pred=predict(best_subset_logregmodel,heart_dat[folds==j,], id = i) #what does id do?
     cv.errors[j,i]=mean((heart_dat$output[folds==j]-pred)^2)
   } 
 }
@@ -164,13 +183,29 @@ mean.cv.errors
 
 # alternate method --> producing NAs
 
-library(boot)
+#library(boot)
 
-cv.error.10=rep(0,10) 
-for (i in 1:10){ 
-  cv.error.10[i]=cv.glm(heart_dat,best_subset_logregmodel,K=10)$delta[1] 
-} 
-cv.error.10
+#cv.error.10=rep(0,10) 
+#for (i in 1:10){ 
+ # cv.error.10[i]=cv.glm(heart_dat,best_subset_logregmodel,K=10)$delta[1] 
+#} 
+#cv.error.10
+```
+
+I am trying this out
+```{r}
+for(j in 1:k){ 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  
+  for(i in 1:13){
+    pred=predict(best_subset_logregmodel,heart_dat[folds==j,], id = i, type = "response") #what does id do?
+    pred = ifelse(pred > 0.5, 1, 0)
+    cv.errors[j,i]=mean((heart_dat$output[folds==j]-pred)^2)
+  } 
+}
+
+mean.cv.errors.anna = apply(cv.errors, 1, mean)
+mean.cv.errors.anna
 
 ```
 
