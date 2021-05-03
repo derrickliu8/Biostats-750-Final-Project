@@ -8,6 +8,7 @@ output: html_document
 ```{r}
 heart_dat <- read.csv("heart.csv")
 head(heart_dat)
+
 ```
 
 # Lasso and Ridge
@@ -27,7 +28,7 @@ grid=10^seq(10,-2,length=100)
 x=model.matrix(output~.,heart_dat)[,-14]
 y=heart_dat$output
 
-lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid)
+lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid, family = binomial)
 plot(lasso.mod)
 ```
 
@@ -38,7 +39,7 @@ plot(lasso.mod)
 # continuing lasso - code adapted from Lab 5
 
 set.seed(1)
-cv.out=cv.glmnet(x[train,],y[train],alpha=1)
+cv.out=cv.glmnet(x[train,],y[train],alpha=1, family = binomial)
 plot(cv.out)
 
 bestlam=cv.out$lambda.min # tuning parameter
@@ -56,7 +57,7 @@ coef(lasso.mod)[,min]
 ```{r}
 # ridge - code adapted from Lab 5
 
-ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12)
+ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12, family = binomial)
 ridge.pred=predict(ridge.mod,newx=x[test,])
 mean((ridge.pred-y.test)^2)
 
@@ -241,6 +242,8 @@ mean.cv.errors.anna = mean(cv.errors2)
 #cv.errors2
 intercept
 ```
+
+
 Anna - this is telling me that the models with 10,11 - 14 predictors give basically the same test errors with logsitcs reg. My brain hurts
 ```{r}
 cv.errors3 = matrix(NA, k, 13)
