@@ -45,12 +45,15 @@ plot(cv.out)
 bestlam=cv.out$lambda.min # tuning parameter
 lasso.pred=predict(lasso.mod,s=bestlam,newx=x[test,])
 mean((lasso.pred-y.test)^2) # MSE
+bestlam
+cv.out$lambda
+
 ```
 
 This is saying that the model with the smallest lambda gives all the coefficients to be zero.
 ```{r}
 min <- which.min(cv.out$lambda)
-coef(lasso.mod)[,min]
+coef(lasso.mod)[,51]
 ```
 
 
@@ -67,7 +70,7 @@ We observe that the mean square error from lasso (0.1467082) is smaller than the
 mean square error from ridge (0.2257933). 
 
 ```{r}
-coef(ridge.mod)[,1]
+coef(ridge.mod)[,14]
 ```
 These are all also essentially zero. This is really bizzare
 
@@ -220,6 +223,7 @@ mean.cv.errors
 
 Anna-I am trying this out
 ```{r}
+set.seed(1)
 model_saver <- matrix(ncol = 10)
 cv.errors2 = matrix(NA, k, 13)
 intercept <- matrix(NA, k, 11)
@@ -239,22 +243,24 @@ for(j in 1:k){
 }
 
 mean.cv.errors.anna = mean(cv.errors2)
-#cv.errors2
+#cv.errors2[,1]
 intercept
+#model_saver
 ```
 
 
 Anna - this is telling me that the models with 10,11 - 14 predictors give basically the same test errors with logsitcs reg. My brain hurts
 ```{r}
 cv.errors3 = matrix(NA, k, 13)
-intercept <- matrix(NA, k, 14)
+intercept2 <- matrix(NA, k, 14)
+model_saver2 <- matrix(ncol = 14)
 
 for(j in 1:k){ 
   #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
   forward_logregmodel <- glm(output ~., data = heart_dat[folds != j,], family = binomial) %>%
   stepAIC(direction = "forward", trace = FALSE)
-  model_saver[j] <- length(forward_logregmodel$coefficients)   #saves the number of non zero coefficients
-  intercept[j,] <- forward_logregmodel$coefficients[1:14] #looks at model coeffeicent
+  model_saver2[j] <- length(forward_logregmodel$coefficients)   #saves the number of non zero coefficients
+  intercept2[j,] <- forward_logregmodel$coefficients[1:14] #looks at model coeffeicent
   
     for(i in 1:13){  
     pred=predict(forward_logregmodel,heart_dat[folds==j,], type = "response") #what does id do? id does nothing
@@ -264,8 +270,9 @@ for(j in 1:k){
 }
 
 mean.cv.errors.anna = mean(cv.errors3)
-#cv.errors3
-intercept
+#cv.errors3[,1]
+intercept2
+#model_saver2
 ```
 
 
