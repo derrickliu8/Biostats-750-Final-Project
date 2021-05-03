@@ -62,8 +62,8 @@ mean((ridge.pred-y.test)^2)
 
 ```
 
-We observe that the mean square error from lasso (0.135445) is smaller than the
-mean square error from ridge (0.2235973). 
+We observe that the mean square error from lasso (0.1467082) is smaller than the
+mean square error from ridge (0.2257933). 
 
 ```{r}
 coef(ridge.mod)[,1]
@@ -95,6 +95,7 @@ best_subset_logregmodel <- glm(output ~., data = heart_dat[train,], family = bin
   #stepAIC(trace = FALSE)
 
 best_subset_logregmodel
+summary(best_subset_logregmodel)
 ```
 
 By best subset selection, the logistic regression model with the smallest AIC 
@@ -110,6 +111,7 @@ forward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomia
   stepAIC(direction = "forward", trace = FALSE)
 
 forward_logregmodel
+summary(forward_logregmodel)
 ```
 
 By forward stepwise selection, the logistic regression model with the smallest
@@ -134,6 +136,29 @@ selection.
 The model chosen by best subset selection/backward stepwise selection has an AIC
 value (127.6) that is smaller than the AIC of the model chosen by forward 
 stepwise selection (133.9). 
+
+Using LDA for the best model
+```{r}
+dt = sort(sample(nrow(heart_dat), nrow(heart_dat)*.9))
+train<-heart_dat[dt,]
+test<-heart_dat[-dt,]
+
+lda_best <- lda(output~ sex + cp + trtbps + fbs + exng + oldpeak + slp + caa + thall, 
+                data = train)
+lda_best_pred <- predict(lda_best, test)
+
+table(lda_best_pred$class, test$output)
+```
+
+Using QDA for the best model
+```{r}
+
+qda_best <- qda(output~ sex + cp + trtbps + fbs + exng + oldpeak + slp + caa + thall, 
+                data = train)
+qda_best_pred <- predict(qda_best, test)
+
+table(qda_best_pred$class, test$output)
+```
 
 ```{r}
 # Performing validation set approach
@@ -267,11 +292,6 @@ cv.errors2
 
 
 # Best subset selection
-
-```{r}
-
-```
-
 
 ```{r}
 library(leaps)
@@ -453,7 +473,6 @@ are still statistically significant.
 
 train = (heart_dat$chol > 200)
 ```
-
 
 ```{r}
 # LDA on the best model (with the lowest cross-validation error), which was the full model
