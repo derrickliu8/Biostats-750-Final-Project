@@ -129,15 +129,10 @@ best_subset_logregmodel
 summary(best_subset_logregmodel)
 ```
 
-By best subset selection, the logistic regression model with the smallest AIC 
-value is 
-log(P(output = 1)) = 4.06126-0.04456*age-1.01364*sex+0.84954*cp+0.79620*restecg -1.60837*exng-0.52590*oldpeak+0.92052*slp-0.69045*caa-0.73848*thall
-
-^has 9 total predictors (I am only counting 6 predictors)
-
 ```{r}
 # fitting a model with forward stepwise selection
 
+set.seed(1)
 forward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
   stepAIC(direction = "forward", trace = FALSE)
 
@@ -145,16 +140,10 @@ forward_logregmodel
 summary(forward_logregmodel)
 ```
 
-By forward stepwise selection, the logistic regression model with the smallest
-AIC value is 
-
-log(P(output = 1)) = 2.5504570-0.0277105*age-1.0056065*sex+0.8132523*cp-0.0115987*trtbps -0.0007255*chol+0.0291891*fbs+0.8567083*restecg+0.0162629*thalachh-1.3413673*exng-0.4693130*oldpeak+0.7931857*slp -0.7187493*caa-0.7710355*thall
-
-^has all 13 total predictors
-
 ```{r}
 # fitting a model with backward stepwise selection
 
+set.seed(1)
 backward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
   stepAIC(direction = "backward", trace = FALSE)
 
@@ -165,8 +154,8 @@ I get the same model from backward stepwise selection as I get from best subset
 selection.
 
 The model chosen by best subset selection/backward stepwise selection has an AIC
-value (127.6) that is smaller than the AIC of the model chosen by forward 
-stepwise selection (133.9). 
+value (117.6) that is smaller than the AIC of the model chosen by forward 
+stepwise selection (131.1). 
 
 Using LDA for the best model
 ```{r}
