@@ -45,6 +45,13 @@ library(stargazer)
 stargazer(heart_attack_dat_2[c("age","trtbps","chol","thalachh","oldpeak")], type="text",summary.stat=c("n","mean","sd", "min", "max"))
 ```
 
+histogram of the resting blood pressure
+```{r}
+hist(heart_attack_dat$trtbps, main = "Resting Blood Pressure", 
+     xlab = "Resting Blood Pressure (in mm Hg)")
+```
+
+
 Initial observations from summary table above:
 
 -The blood pressures for people in this data set are also seemingly really high. 

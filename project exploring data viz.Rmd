@@ -15,7 +15,12 @@ library(tidyverse)
 
 histogram of the age
 ```{r}
-hist(heart$age)
+hist(heart$age, main = "Ages", xlab = "Age (in years)")
+#lines(density(heart$age), col="red")
+#lines(seq(25, 80, by=5), dnorm(seq(25, 80, by=5),
+     # mean(heart$age), sd(heart$age)), col="blue")
+curve(dnorm(x, mean=mean(heart$age), sd=sd(heart$age)), 
+      col="darkblue", lwd=2, add=TRUE, yaxt="n")
 ```
 
 
