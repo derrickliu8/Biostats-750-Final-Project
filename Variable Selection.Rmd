@@ -20,15 +20,15 @@ library(glmnet)
 
 train=sample(1:nrow(heart_dat), nrow(heart_dat)/2)
 test = (-train)
-y=heart_dat$output
-y.test=y[test]
 
 grid=10^seq(10,-2,length=100)
 
 x=model.matrix(output~.,heart_dat)[,-14]
 y=heart_dat$output
+y.test=y[test]
 
-lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid, family = binomial)
+lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid)
+#lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid, family = binomial)
 plot(lasso.mod)
 ```
 
@@ -39,12 +39,18 @@ plot(lasso.mod)
 # continuing lasso - code adapted from Lab 5
 
 set.seed(1)
-cv.out=cv.glmnet(x[train,],y[train],alpha=1, family = binomial)
+cv.out=cv.glmnet(x[train,],y[train],alpha=1)
+#cv.out=cv.glmnet(x[train,],y[train],alpha=1, family = binomial)
 plot(cv.out)
 
 bestlam=cv.out$lambda.min # tuning parameter
 lasso.pred=predict(lasso.mod,s=bestlam,newx=x[test,])
 mean((lasso.pred-y.test)^2) # MSE
+
+out = glmnet(x,y,alpha=1,lambda=grid) # producing a model with 10 predictors
+lasso.coef=predict(out,type="coefficients",s=bestlam)[1:13,]
+lasso.coef[lasso.coef!=0] 
+
 bestlam
 cv.out$lambda
 
@@ -60,9 +66,15 @@ coef(lasso.mod)[,51]
 ```{r}
 # ridge - code adapted from Lab 5
 
-ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12, family = binomial)
+ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12)
+#ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12, 
+                 #family = binomial)
 ridge.pred=predict(ridge.mod,newx=x[test,])
 mean((ridge.pred-y.test)^2)
+
+out2=glmnet(x,y,alpha=0)  # again, glmnet function is producing a model with not all zero values for the parameter estimates
+# glmnet function fits a GLM with lasso or elastic net regularization
+predict(out2,type="coefficients",s=bestlam)[1:13,]
 
 ```
 
