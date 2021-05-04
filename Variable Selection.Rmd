@@ -11,6 +11,21 @@ head(heart_dat)
 
 ```
 
+```{r}
+heart_dat$sex <- as.factor(heart_dat$sex)
+heart_dat$cp <- as.factor(heart_dat$cp)
+heart_dat$fbs <- as.factor(heart_dat$fbs)
+heart_dat$restecg <- as.factor(heart_dat$restecg)
+heart_dat$exng <- as.factor(heart_dat$exng)
+heart_dat$slp <- as.factor(heart_dat$slp)
+heart_dat$caa <- as.factor(heart_dat$caa)
+heart_dat$thall <- as.factor(heart_dat$thall)
+#heart_dat$output <- as.factor(heart_dat$output)
+
+heart_dat
+```
+
+
 # Lasso and Ridge
 
 ```{r}

@@ -57,6 +57,12 @@ round(cov(heart), 2)
 
 ```
 
+```{r}
+round(var(heart), 2)
+
+var(heart)
+```
+
 
 correlation amongst all the predictors, non seem to be super correlated
 ```{r}
