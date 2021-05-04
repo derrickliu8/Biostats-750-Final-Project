@@ -89,8 +89,8 @@ mean((ridge.pred-y.test)^2)
 
 out2=glmnet(x,y,alpha=0)  # again, glmnet function is producing a model with not all zero values for the parameter estimates
 # glmnet function fits a GLM with lasso or elastic net regularization
-predict(out2,type="coefficients",s=bestlam)[1:13,]
-
+ridge.coef = predict(out2,type="coefficients",s=bestlam)[1:13,]
+ridge.coef[ridge.coef!=0] 
 ```
 
 We observe that the mean square error from lasso (0.1467082) is smaller than the
