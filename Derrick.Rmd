@@ -51,6 +51,11 @@ hist(heart_attack_dat$trtbps, main = "Resting Blood Pressure",
      xlab = "Resting Blood Pressure (in mm Hg)")
 ```
 
+```{r}
+hist(heart_attack_dat$chol, main = "Cholesterol Levels", 
+     xlab = "Cholesterol (mg/dl)")
+```
+
 
 Initial observations from summary table above:
 
