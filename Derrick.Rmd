@@ -42,7 +42,7 @@ cholesterol levels > 200 seem really odd --> is this data accurate?
 
 library(stargazer)
 
-stargazer(heart_attack_dat_2[c("age","trtbps","chol","thalachh","oldpeak")], type="text",summary.stat=c("n","mean","sd", "min", "max"))
+stargazer(heart_attack_dat[c("age","trtbps","chol","thalachh","oldpeak")], type="text",summary.stat=c("n","mean","sd", "min", "max"))
 ```
 
 histogram of the resting blood pressure
