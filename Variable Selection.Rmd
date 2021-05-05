@@ -154,30 +154,40 @@ I get the same model from backward stepwise selection as I get from best subset
 selection.
 
 The model chosen by best subset selection/backward stepwise selection has an AIC
-value (117.6) that is smaller than the AIC of the model chosen by forward 
-stepwise selection (131.1). 
+value (118.9) that is smaller than the AIC of the model chosen by forward 
+stepwise selection (129.64). 
+
+# Fitting our final model (for now) chosen from AIC on the original dataset
+
+```{r}
+final_logregmodel <- glm(output ~sex+cp+trtbps+thalachh+exng+caa+thall, 
+                         data = heart_dat, family = binomial) 
+summary(final_logregmodel)
+```
+
 
 Using LDA for the best model
 ```{r}
+set.seed(1)
 dt = sort(sample(nrow(heart_dat), nrow(heart_dat)*.9))
-train<-heart_dat[dt,]
-test<-heart_dat[-dt,]
+train2<-heart_dat[dt,]
+test2<-heart_dat[-dt,]
 
-lda_best <- lda(output~ sex + cp + trtbps + fbs + exng + oldpeak + slp + caa + thall, 
-                data = train)
-lda_best_pred <- predict(lda_best, test)
+lda_best <- lda(output~ sex+cp+trtbps+thalachh+exng+caa+thall, 
+                data = train2)
+lda_best_pred <- predict(lda_best, test2)
 
-table(lda_best_pred$class, test$output)
+table(lda_best_pred$class, test2$output)
 ```
 
 Using QDA for the best model
 ```{r}
+set.seed(1)
+qda_best <- qda(output~ sex+cp+trtbps+thalachh+exng+caa+thall, 
+                data = train2)
+qda_best_pred <- predict(qda_best, test2)
 
-qda_best <- qda(output~ sex + cp + trtbps + fbs + exng + oldpeak + slp + caa + thall, 
-                data = train)
-qda_best_pred <- predict(qda_best, test)
-
-table(qda_best_pred$class, test$output)
+table(qda_best_pred$class, test2$output)
 ```
 
 ```{r}
@@ -493,12 +503,6 @@ All variables that were statistically significant in the model chosen from CV
 are still statistically significant. 
 
 # LDA
-
-```{r}
-# has to be chosen purposefully
-
-train = (heart_dat$chol > 200)
-```
 
 ```{r}
 # LDA on the best model (with the lowest cross-validation error), which was the full model
