@@ -28,11 +28,63 @@ hist(heart_dat$trtbps, main = "Resting Blood Pressure",
 ```
 
 ```{r}
+# log(trtbps+1) transformation to see if that fixes the skewness to the right
+# read that log(x+1) transformation works to fix distributions skewed to the 
+# right at the following link: http://seismo.berkeley.edu/~kirchner/eps_120/Toolkits/Toolkit_03.pdf 
+# looks a lot more normally distributed
+
+library(base)
+
+heart_dat$trtbps_transformed <- log10((heart_dat$trtbps)+1)
+
+hist(heart_dat$trtbps_transformed, main = "Resting Blood Pressure", 
+     xlab = "Resting Blood Pressure (in mm Hg)")
+```
+
+```{r}
 # histogram of the cholesterol levels
 
 hist(heart_dat$chol, main = "Cholesterol Levels", 
      xlab = "Cholesterol (mg/dl)")
 ```
+
+```{r}
+# log(chol+1) transformation to see if that fixes the skewness to the right
+# looks a lot more normally distributed
+
+heart_dat$chol_transformed <- log10((heart_dat$chol)+1)
+
+hist(heart_dat$chol_transformed, main = "Cholesterol Levels", 
+     xlab = "Cholesterol (mg/dl)")
+```
+
+```{r}
+# histogram of the maximum heart rate achieved
+# looks like there is a skew to the left
+
+hist(heart_dat$thalachh, main = "Maximum Heart Rate", 
+     xlab = "Maximum Heart Rate Achieved (in bpm)")
+```
+
+```{r}
+# sqrt(constant-thalachh) transformation to see if that fixes the skewness to the left
+# looks a lot more normally distributed
+# coombatting left skew: https://rcompanion.org/handbook/I_12.html#:~:text=For%20left%2Dskewed%20data%E2%80%94tail,log%20(constant%20%E2%80%93%20x).
+
+heart_dat$thalachh_transformed <- sqrt(250-(heart_dat$thalachh))
+
+hist(heart_dat$thalachh_transformed, main = "Maximum Heart Rate", 
+     xlab = "Maximum Heart Rate Achieved (in bpm)")
+```
+
+```{r}
+# histogram of the oldpeak variable
+# looks like there is a skew to the left
+
+hist(heart_dat$oldpeak, main = "Oldpeak Variable", 
+     xlab = "Oldpeak Variable")
+```
+
 
 0 = female, 1 = male, more than twice as many men in this dataset
 ```{r}
