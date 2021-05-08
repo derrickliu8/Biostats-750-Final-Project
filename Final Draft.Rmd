@@ -1,0 +1,237 @@
+---
+title: "Final Draft"
+author: "Derrick Liu"
+date: "5/8/2021"
+output: html_document
+---
+
+```{r}
+# reading in the data set
+
+heart_dat <- read.csv("heart.csv")
+head(heart_dat)
+```
+
+# Data visualization
+
+```{r}
+# histogram of the age variable
+
+hist(heart_dat$age, main = "Ages", xlab = "Age (in years)")
+```
+
+```{r}
+# histogram of the resting blood pressure
+
+hist(heart_dat$trtbps, main = "Resting Blood Pressure", 
+     xlab = "Resting Blood Pressure (in mm Hg)")
+```
+
+```{r}
+# histogram of the cholesterol levels
+
+hist(heart_dat$chol, main = "Cholesterol Levels", 
+     xlab = "Cholesterol (mg/dl)")
+```
+
+0 = female, 1 = male, more than twice as many men in this dataset
+```{r}
+heart_dat %>% group_by(sex) %>% summarise( total = n())
+```
+
+correlation amongst all the predictors, non seem to be super correlated
+```{r}
+round(cor(heart), 2)
+```
+
+```{r}
+# getting summary statistics for each of the numeric type predictor variables to 
+# be used from the data set
+
+library(stargazer)
+
+stargazer(heart_dat[c("age","trtbps","chol","thalachh","oldpeak")], type="text",summary.stat=c("n","mean","sd", "min", "max"))
+```
+
+```{r}
+# changing all the non-numeric variables to factor type variables
+
+heart_dat$sex <- as.factor(heart_dat$sex)
+heart_dat$cp <- as.factor(heart_dat$cp)
+heart_dat$fbs <- as.factor(heart_dat$fbs)
+heart_dat$restecg <- as.factor(heart_dat$restecg)
+heart_dat$exng <- as.factor(heart_dat$exng)
+heart_dat$slp <- as.factor(heart_dat$slp)
+heart_dat$caa <- as.factor(heart_dat$caa)
+heart_dat$thall <- as.factor(heart_dat$thall)
+#heart_dat$output <- as.factor(heart_dat$output)
+
+head(heart_dat)
+```
+
+# Lasso and Ridge
+
+```{r}
+# lasso - code adapted from Lab 5
+# binomial still not working here
+
+library(glmnet)
+
+train=sample(1:nrow(heart_dat), nrow(heart_dat)/2)
+test = (-train)
+
+grid=10^seq(10,-2,length=100)
+
+x=model.matrix(output~.,heart_dat)[,-14]
+y=heart_dat$output
+y.test=y[test]
+
+lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid)
+#lasso.mod=glmnet(x[train,],y[train],alpha=1,lambda=grid, family = binomial)
+plot(lasso.mod)
+```
+
+```{r}
+# continuing lasso - code adapted from Lab 5
+
+set.seed(1)
+cv.out=cv.glmnet(x[train,],y[train],alpha=1)
+#cv.out=cv.glmnet(x[train,],y[train],alpha=1, family = binomial)
+plot(cv.out)
+
+bestlam=cv.out$lambda.min # tuning parameter
+lasso.pred=predict(lasso.mod,s=bestlam,newx=x[test,])
+mean((lasso.pred-y.test)^2) # MSE
+
+out = glmnet(x,y,alpha=1,lambda=grid) # producing a model with 10 predictors
+lasso.coef=predict(out,type="coefficients",s=bestlam)[1:13,]
+lasso.coef[lasso.coef!=0] 
+
+bestlam
+cv.out$lambda
+
+```
+
+```{r}
+# ridge - code adapted from Lab 5
+
+ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12)
+#ridge.mod=glmnet(x[train,],y[train],alpha=0,lambda=grid, thresh=1e-12, 
+                 #family = binomial)
+ridge.pred=predict(ridge.mod,newx=x[test,])
+mean((ridge.pred-y.test)^2)
+
+out2=glmnet(x,y,alpha=0)  # again, glmnet function is producing a model with not all zero values for the parameter estimates
+# glmnet function fits a GLM with lasso or elastic net regularization
+ridge.coef = predict(out2,type="coefficients",s=bestlam)[1:13,]
+ridge.coef[ridge.coef!=0] 
+```
+
+# Fitting a logistic regression model
+
+```{r}
+
+# fitting a model with best subset selection
+
+library(MASS) # for the stepAIC function
+library(dplyr) # for the pipeline operator
+
+set.seed(1)
+
+best_subset_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+  stepAIC(trace = FALSE)
+
+best_subset_logregmodel
+summary(best_subset_logregmodel)
+```
+
+```{r}
+# fitting a model with forward stepwise selection
+
+set.seed(1)
+forward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+  stepAIC(direction = "forward", trace = FALSE)
+
+forward_logregmodel
+summary(forward_logregmodel)
+```
+
+```{r}
+# fitting a model with backward stepwise selection
+
+set.seed(1)
+backward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+  stepAIC(direction = "backward", trace = FALSE)
+
+backward_logregmodel
+summary(backward_logregmodel)
+```
+
+# Fitting our final model (for now) chosen from AIC on the original dataset
+
+```{r}
+final_logregmodel <- glm(output ~sex+cp+trtbps+thalachh+exng+caa+thall, 
+                         data = heart_dat, family = binomial) 
+summary(final_logregmodel)
+```
+
+# k-fold Cross Validation
+
+```{r}
+# Cross Validation done on the model chosen by best subset selection
+
+k = 10
+folds = sample(1:k, nrow(heart_dat), replace = TRUE)
+
+set.seed(1)
+model_saver <- matrix(ncol = 10)
+cv.errors2 = matrix(NA, k, 13)
+intercept <- matrix(NA, k, 11)
+
+for(j in 1:k){ 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+   best_subset_logregmodel <- glm(output ~., data = heart_dat[folds != j,], family = binomial) %>%
+  stepAIC(trace = F)
+  model_saver[j] <- length(best_subset_logregmodel$coefficients)  #saves the number of non-zero coefficients
+  intercept[j,] <- best_subset_logregmodel$coefficients[1:11]     #looks at model coefficients
+  
+    for(i in 1:13){
+    pred=predict(best_subset_logregmodel,heart_dat[folds==j,], type = "response") #what does id do? id does nothing
+    pred = ifelse(pred > 0.5, 1, 0)
+    cv.errors2[j, i]=mean((heart_dat$output[folds==j] != pred))
+    }
+}
+
+mean.cv.errors.anna = mean(cv.errors2)
+#cv.errors2[,1]
+intercept
+#model_saver
+```
+
+```{r}
+# Cross Validation done on the model chosen by forward stepwise selection
+
+cv.errors3 = matrix(NA, k, 13)
+intercept2 <- matrix(NA, k, 14)
+model_saver2 <- matrix(ncol = 14)
+
+for(j in 1:k){ 
+  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  forward_logregmodel <- glm(output ~., data = heart_dat[folds != j,], family = binomial) %>%
+  stepAIC(direction = "forward", trace = FALSE)
+  model_saver2[j] <- length(forward_logregmodel$coefficients)   #saves the number of non zero coefficients
+  intercept2[j,] <- forward_logregmodel$coefficients[1:14] #looks at model coeffeicent
+  
+    for(i in 1:13){  
+    pred=predict(forward_logregmodel,heart_dat[folds==j,], type = "response") #what does id do? id does nothing
+    pred = ifelse(pred > 0.5, 1, 0)
+    cv.errors3[j,i]=mean(heart_dat$output[folds==j] != pred)
+    } 
+}
+
+mean.cv.errors.anna = mean(cv.errors3)
+#cv.errors3[,1]
+intercept2
+#model_saver2
+```
+
