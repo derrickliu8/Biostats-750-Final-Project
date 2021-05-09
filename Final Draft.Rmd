@@ -233,7 +233,7 @@ summary(backward_logregmodel)
 # Fitting our final model (for now) chosen from AIC on the original dataset
 
 ```{r}
-final_logregmodel <- glm(output ~sex+cp+trtbps+thalachh+exng+caa+thall, 
+final_logregmodel <- glm(output ~sex+cp+trtbps+exng+oldpeak+slp+caa+thall, 
                          data = heart_dat, family = binomial) 
 summary(final_logregmodel)
 ```
