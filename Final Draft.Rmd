@@ -201,7 +201,7 @@ library(dplyr) # for the pipeline operator
 
 set.seed(1)
 
-best_subset_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+best_subset_logregmodel <- glm(output ~., data = heart_dat, family = binomial) %>%
   stepAIC(trace = FALSE)
 
 best_subset_logregmodel
@@ -212,7 +212,7 @@ summary(best_subset_logregmodel)
 # fitting a model with forward stepwise selection
 
 set.seed(1)
-forward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+forward_logregmodel <- glm(output ~., data = heart_dat, family = binomial) %>%
   stepAIC(direction = "forward", trace = FALSE)
 
 forward_logregmodel
@@ -223,7 +223,7 @@ summary(forward_logregmodel)
 # fitting a model with backward stepwise selection
 
 set.seed(1)
-backward_logregmodel <- glm(output ~., data = heart_dat[train,], family = binomial) %>%
+backward_logregmodel <- glm(output ~., data = heart_dat, family = binomial) %>%
   stepAIC(direction = "backward", trace = FALSE)
 
 backward_logregmodel
@@ -301,7 +301,7 @@ model_saver2
 ## AUC Area under the curve - Jings suggestion
 ```{r}
 library(ROCR)
-y <- heart_dat[,test]$output
+
 ```
 
 
@@ -311,11 +311,52 @@ back.preds <- predict(backward_logregmodel, data = heart_dat, type = "response")
 back.preds <- ifelse(back.preds < 0.5, 0, 1)
 back.rocr <- prediction(back.preds, heart_dat$output)
 
-back.perf <- performance(pred,"tpr","fpr")
-plot(back.perf)
+back.perf <- performance(back.rocr,"tpr","fpr")
+plot(back.perf, avg="threshold",
+     spread.estimate="boxplot")
+
 performance(back.rocr,"auc")@y.values
 ```
 
 
+forwards model
+```{r}
+forw.preds <- predict(forward_logregmodel, data = heart_dat, type = "response")
+forw.preds <- ifelse(forw.preds < 0.5, 0, 1)
+forw.rocr <- prediction(forw.preds, heart_dat$output)
 
+forw.perf <- performance(forw.rocr,"tpr","fpr")
+plot(forw.perf, avg="threshold",
+     spread.estimate="boxplot")
+
+performance(forw.rocr,"auc")@y.values
+```
+
+
+best subset model
+```{r}
+best.preds <- predict(best_subset_logregmodel, data = heart_dat, type = "response")
+best.preds <- ifelse(best.preds < 0.5, 0, 1)
+best.rocr <- prediction(best.preds, heart_dat$output)
+
+best.perf <- performance(best.rocr,"tpr","fpr")
+plot(best.perf, avg="threshold",
+     spread.estimate="boxplot")
+
+performance(best.rocr,"auc")@y.values
+```
+
+
+Final logreg model
+```{r}
+final.preds <- predict(final_logregmodel, data = heart_dat, type = "response")
+final.preds <- ifelse(final.preds < 0.5, 0, 1)
+final.rocr <- prediction(final.preds, heart_dat$output)
+
+final.perf <- performance(final.rocr,"tpr","fpr")
+plot(final.perf, avg="threshold",
+     spread.estimate="boxplot")
+
+performance(final.rocr,"auc")@y.values
+```
 
