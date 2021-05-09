@@ -267,8 +267,8 @@ for(j in 1:k){
 
 mean.cv.errors.anna = mean(cv.errors2)
 #cv.errors2[,1]
-intercept
-#model_saver
+#intercept
+model_saver
 ```
 
 ```{r}
@@ -294,7 +294,28 @@ for(j in 1:k){
 
 mean.cv.errors.anna = mean(cv.errors3)
 #cv.errors3[,1]
-intercept2
-#model_saver2
+##intercept2
+model_saver2
 ```
+
+## AUC Area under the curve - Jings suggestion
+```{r}
+library(ROCR)
+y <- heart_dat[,test]$output
+```
+
+
+backwards model
+```{r}
+back.preds <- predict(backward_logregmodel, data = heart_dat, type = "response")
+back.preds <- ifelse(back.preds < 0.5, 0, 1)
+back.rocr <- prediction(back.preds, heart_dat$output)
+
+back.perf <- performance(pred,"tpr","fpr")
+plot(back.perf)
+performance(back.rocr,"auc")@y.values
+```
+
+
+
 
