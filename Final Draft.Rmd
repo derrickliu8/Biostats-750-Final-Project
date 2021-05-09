@@ -79,21 +79,32 @@ hist(heart_dat$thalachh_transformed, main = "Maximum Heart Rate",
 
 ```{r}
 # histogram of the oldpeak variable
-# looks like there is a skew to the left
+# looks like there is a strong skew to the right
 
-hist(heart_dat$oldpeak, main = "Oldpeak Variable", 
-     xlab = "Oldpeak Variable")
+hist(heart_dat$oldpeak, main = "ST Depression", 
+     xlab = "ST Depression Induced by Exercise Relative to Rest")
 ```
 
+```{r}
+# log(oldpeak+1) transformation to see if that fixes the skewness to the right
+# the skew to the right seems to be less by a tiny bit, but it is still there
+
+heart_dat$oldpeak_transformed <- log10((heart_dat$oldpeak)+1)
+
+hist(heart_dat$oldpeak_transformed, main = "ST Depression", 
+     xlab = "ST Depression Induced by Exercise Relative to Rest")
+```
 
 0 = female, 1 = male, more than twice as many men in this dataset
 ```{r}
+library(dplyr)
+
 heart_dat %>% group_by(sex) %>% summarise( total = n())
 ```
 
 correlation amongst all the predictors, non seem to be super correlated
 ```{r}
-round(cor(heart), 2)
+round(cor(heart_dat), 2)
 ```
 
 ```{r}
