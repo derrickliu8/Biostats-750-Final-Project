@@ -252,14 +252,14 @@ cv.errors2 = matrix(NA, k, 13)
 intercept <- matrix(NA, k, 11)
 
 for(j in 1:k){ 
-  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+
    best_subset_logregmodel <- glm(output ~., data = heart_dat[folds != j,], family = binomial) %>%
   stepAIC(trace = F)
   model_saver[j] <- length(best_subset_logregmodel$coefficients)  #saves the number of non-zero coefficients
   intercept[j,] <- best_subset_logregmodel$coefficients[1:11]     #looks at model coefficients
   
     for(i in 1:13){
-    pred=predict(best_subset_logregmodel,heart_dat[folds==j,], type = "response") #what does id do? id does nothing
+    pred=predict(best_subset_logregmodel,heart_dat[folds==j,], type = "response") 
     pred = ifelse(pred > 0.5, 1, 0)
     cv.errors2[j, i]=mean((heart_dat$output[folds==j] != pred))
     }
@@ -279,14 +279,14 @@ intercept2 <- matrix(NA, k, 14)
 model_saver2 <- matrix(ncol = 14)
 
 for(j in 1:k){ 
-  #best.fit=regsubsets(output~.,data=heart_dat[folds!=j,], nvmax =13) 
+  
   forward_logregmodel <- glm(output ~., data = heart_dat[folds != j,], family = binomial) %>%
   stepAIC(direction = "forward", trace = FALSE)
   model_saver2[j] <- length(forward_logregmodel$coefficients)   #saves the number of non zero coefficients
   intercept2[j,] <- forward_logregmodel$coefficients[1:14] #looks at model coeffeicent
   
     for(i in 1:13){  
-    pred=predict(forward_logregmodel,heart_dat[folds==j,], type = "response") #what does id do? id does nothing
+    pred=predict(forward_logregmodel,heart_dat[folds==j,], type = "response") 
     pred = ifelse(pred > 0.5, 1, 0)
     cv.errors3[j,i]=mean(heart_dat$output[folds==j] != pred)
     } 
