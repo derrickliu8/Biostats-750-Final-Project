@@ -260,6 +260,7 @@ set.seed(1)
 model_saver <- matrix(ncol = 10)
 cv.errors2 = matrix(NA, k, 13)
 intercept <- matrix(NA, k, 11)
+predictors_saver <- matrix(NA, k, 1)
 
 for(j in 1:k){ 
 
@@ -267,6 +268,8 @@ for(j in 1:k){
   stepAIC(trace = F)
   model_saver[j] <- length(best_subset_logregmodel$coefficients)  #saves the number of non-zero coefficients
   intercept[j,] <- best_subset_logregmodel$coefficients[1:11]     #looks at model coefficients
+  predictors <- summary(best_subset_logregmodel)
+  predictors_saver[j] <- c(predictors$call)    #Saves the model predictors
   
     for(i in 1:13){
     pred=predict(best_subset_logregmodel,heart_dat[folds==j,], type = "response") 
@@ -275,10 +278,10 @@ for(j in 1:k){
     }
 }
 
-mean.cv.errors.anna = mean(cv.errors2)
-#cv.errors2[,1]
-#intercept
-model_saver
+mean.cv.errors.best = mean(cv.errors2)
+#mean.cv.errors.best         # gives the average misclassification rate
+#intercept                 #These are the coefficents
+predictors_saver         # These are the predictors and the models    
 ```
 
 ```{r}
@@ -287,6 +290,7 @@ model_saver
 cv.errors3 = matrix(NA, k, 13)
 intercept2 <- matrix(NA, k, 14)
 model_saver2 <- matrix(ncol = 14)
+predictors2_saver <- matrix(NA, k, 1)
 
 for(j in 1:k){ 
   
@@ -294,6 +298,8 @@ for(j in 1:k){
   stepAIC(direction = "forward", trace = FALSE)
   model_saver2[j] <- length(forward_logregmodel$coefficients)   #saves the number of non zero coefficients
   intercept2[j,] <- forward_logregmodel$coefficients[1:14] #looks at model coeffeicent
+    predictors2 <- summary(forward_logregmodel)
+  predictors2_saver[j] <- c(predictors2$call)
   
     for(i in 1:13){  
     pred=predict(forward_logregmodel,heart_dat[folds==j,], type = "response") 
@@ -302,10 +308,10 @@ for(j in 1:k){
     } 
 }
 
-mean.cv.errors.anna = mean(cv.errors3)
-#cv.errors3[,1]
-##intercept2
-model_saver2
+mean.cv.errors.forward = mean(cv.errors3)
+#mean.cv.errors.forward     #gives the average misclassification rate
+##intercept2            #These are the coefficients
+predictors2_saver        #These are the models and predictors
 ```
 
 ## AUC Area under the curve - Jings suggestion
