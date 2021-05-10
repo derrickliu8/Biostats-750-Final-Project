@@ -102,6 +102,15 @@ library(dplyr)
 heart_dat %>% group_by(sex) %>% summarise( total = n())
 ```
 
+```{r}
+# modified data set with transformed variables to use for model in LDA/QDA
+# so the normality assumption for the data is not violated
+
+heart_dat_modified <- heart_dat[,-c(4,5,8,18)]
+head(heart_dat_modified)
+```
+
+
 correlation amongst all the predictors, non seem to be super correlated
 ```{r}
 round(cor(heart_dat), 2)
@@ -360,3 +369,86 @@ plot(final.perf, avg="threshold",
 performance(final.rocr,"auc")@y.values
 ```
 
+# For LDA and QDA
+
+```{r}
+# changing all the non-numeric variables to factor type variables
+
+heart_dat_modified$sex <- as.factor(heart_dat_modified$sex)
+heart_dat_modified$cp <- as.factor(heart_dat_modified$cp)
+heart_dat_modified$fbs <- as.factor(heart_dat_modified$fbs)
+heart_dat_modified$restecg <- as.factor(heart_dat_modified$restecg)
+heart_dat_modified$exng <- as.factor(heart_dat_modified$exng)
+heart_dat_modified$slp <- as.factor(heart_dat_modified$slp)
+heart_dat_modified$caa <- as.factor(heart_dat_modified$caa)
+heart_dat_modified$thall <- as.factor(heart_dat_modified$thall)
+#heart_dat$output <- as.factor(heart_dat$output)
+
+head(heart_dat_modified)
+```
+
+
+```{r}
+
+# fitting a model with best subset selection
+
+set.seed(1)
+
+best_subset_logregmodel2 <- glm(output ~., data = heart_dat_modified, family = binomial) %>%
+  stepAIC(trace = FALSE)
+
+best_subset_logregmodel2
+summary(best_subset_logregmodel2)
+```
+
+```{r}
+# fitting a model with forward stepwise selection
+
+set.seed(1)
+forward_logregmodel2 <- glm(output ~., data = heart_dat_modified, family = binomial) %>%
+  stepAIC(direction = "forward", trace = FALSE)
+
+forward_logregmodel2
+summary(forward_logregmodel2)
+```
+
+```{r}
+# fitting a model with backward stepwise selection
+
+set.seed(1)
+backward_logregmodel2 <- glm(output ~., data = heart_dat_modified, family = binomial) %>%
+  stepAIC(direction = "backward", trace = FALSE)
+
+backward_logregmodel2
+summary(backward_logregmodel2)
+```
+
+Again, we see that the model chosen (with lowest AIC) by best subset selection
+and backward stepwise selection are the same, even with the transformed variables
+in place of the original variables trtbps, chol, and thalachh. 
+
+```{r}
+# LDA for the model chosen by best subset selection/backward stepwise selection
+
+set.seed(1)
+dt2 = sort(sample(nrow(heart_dat_modified), nrow(heart_dat_modified)*.9))
+train2 <- heart_dat_modified[dt2,]
+test2 <- heart_dat_modified[-dt2,]
+
+lda_best <- lda(output~ sex+cp+exng+oldpeak+slp+caa+thall+trtbps_transformed+thalachh_transformed, 
+                data = train2)
+lda_best_pred <- predict(lda_best, test2)
+
+table(lda_best_pred$class, test2$output)
+```
+
+```{r}
+# QDA for the model chosen by best subset selection/backward stepwise selection
+
+set.seed(1)
+qda_best <- qda(output~ sex+cp+exng+oldpeak+slp+caa+thall+trtbps_transformed+thalachh_transformed, 
+                data = train2)
+qda_best_pred <- predict(qda_best, test2)
+
+table(qda_best_pred$class, test2$output)
+```
