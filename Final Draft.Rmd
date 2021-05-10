@@ -35,9 +35,10 @@ hist(heart_dat$trtbps, main = "Resting Blood Pressure",
 
 library(base)
 
-heart_dat$trtbps_transformed <- log10((heart_dat$trtbps)+1)
+heart_dat_mod <- heart_dat
+heart_dat_mod$trtbps_transformed <- log10((heart_dat_mod$trtbps)+1)
 
-hist(heart_dat$trtbps_transformed, main = "Resting Blood Pressure", 
+hist(heart_dat_mod$trtbps_transformed, main = "Resting Blood Pressure", 
      xlab = "Resting Blood Pressure (in mm Hg)")
 ```
 
@@ -52,9 +53,9 @@ hist(heart_dat$chol, main = "Cholesterol Levels",
 # log(chol+1) transformation to see if that fixes the skewness to the right
 # looks a lot more normally distributed
 
-heart_dat$chol_transformed <- log10((heart_dat$chol)+1)
+heart_dat_mod$chol_transformed <- log10((heart_dat_mod$chol)+1)
 
-hist(heart_dat$chol_transformed, main = "Cholesterol Levels", 
+hist(heart_dat_mod$chol_transformed, main = "Cholesterol Levels", 
      xlab = "Cholesterol (mg/dl)")
 ```
 
@@ -71,9 +72,9 @@ hist(heart_dat$thalachh, main = "Maximum Heart Rate",
 # looks a lot more normally distributed
 # coombatting left skew: https://rcompanion.org/handbook/I_12.html#:~:text=For%20left%2Dskewed%20data%E2%80%94tail,log%20(constant%20%E2%80%93%20x).
 
-heart_dat$thalachh_transformed <- sqrt(250-(heart_dat$thalachh))
+heart_dat_mod$thalachh_transformed <- sqrt(250-(heart_dat_mod$thalachh))
 
-hist(heart_dat$thalachh_transformed, main = "Maximum Heart Rate", 
+hist(heart_dat_mod$thalachh_transformed, main = "Maximum Heart Rate", 
      xlab = "Maximum Heart Rate Achieved (in bpm)")
 ```
 
@@ -89,9 +90,9 @@ hist(heart_dat$oldpeak, main = "ST Depression",
 # log(oldpeak+1) transformation to see if that fixes the skewness to the right
 # the skew to the right seems to be less by a tiny bit, but it is still there
 
-heart_dat$oldpeak_transformed <- log10((heart_dat$oldpeak)+1)
+heart_dat_mod$oldpeak_transformed <- log10((heart_dat_mod$oldpeak)+1)
 
-hist(heart_dat$oldpeak_transformed, main = "ST Depression", 
+hist(heart_dat_mod$oldpeak_transformed, main = "ST Depression", 
      xlab = "ST Depression Induced by Exercise Relative to Rest")
 ```
 
@@ -106,7 +107,7 @@ heart_dat %>% group_by(sex) %>% summarise( total = n())
 # modified data set with transformed variables to use for model in LDA/QDA
 # so the normality assumption for the data is not violated
 
-heart_dat_modified <- heart_dat[,-c(4,5,8,18)]
+heart_dat_modified <- heart_dat_mod[,-c(4,5,8,18)]
 head(heart_dat_modified)
 ```
 
