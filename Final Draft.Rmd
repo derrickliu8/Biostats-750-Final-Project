@@ -314,7 +314,7 @@ mean.cv.errors.forward = mean(cv.errors3)
 predictors2_saver        #These are the models and predictors
 ```
 
-## AUC Area under the curve - Jings suggestion
+## AUC Area under the curve 
 ```{r}
 library(ROCR)
 
@@ -363,7 +363,7 @@ performance(best.rocr,"auc")@y.values
 ```
 
 
-Final logreg model
+Final logreg model (same as the model chosen by best subset selection/backward stepwise selection)
 ```{r}
 final.preds <- predict(final_logregmodel, data = heart_dat, type = "response")
 final.preds <- ifelse(final.preds < 0.5, 0, 1)
