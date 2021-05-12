@@ -341,9 +341,13 @@ forw.preds <- predict(forward_logregmodel, data = heart_dat, type = "response")
 forw.preds <- ifelse(forw.preds < 0.5, 0, 1)
 forw.rocr <- prediction(forw.preds, heart_dat$output)
 
+jpeg("forwar.jpeg", width = 600, height = 400)
+
 forw.perf <- performance(forw.rocr,"tpr","fpr")
-plot(forw.perf, avg="threshold",
+forward.plot <- plot(forw.perf, avg="threshold",
      spread.estimate="boxplot")
+
+dev.off()
 
 performance(forw.rocr,"auc")@y.values
 ```
